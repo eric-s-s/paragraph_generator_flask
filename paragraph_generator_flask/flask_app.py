@@ -4,22 +4,18 @@ from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
 
-VERBS = [
-    {'verb': 'go', 'irregular_past': 'went', 'preposition': 'to', 'particle': '', 'objects': 1},
-    {'verb': 'take', 'irregular_past': 'took', 'preposition': '', 'particle': 'away', 'objects': 1}
-]
-UNCOUNTABLE_NOUNS = [{'noun': 'water'}, {'noun': 'air'}]
-COUNTABLE_NOUNS = [{'noun': 'dog', 'irregular_plural': ''}, {'noun': 'child', 'irregular_plural': 'children'}]
-STATIC_NOUNS = [{'noun': 'Joe', 'is_plural': False}, {'noun': 'the two Jakes', 'is_plural': True}]
 
-
-@app.route('/new')
+@app.route('/generate')
 def get_paragraph_json():
     json_data = request.json
-    word_lists = pg.WordLists(verbs=VERBS, uncountable=UNCOUNTABLE_NOUNS, countable=COUNTABLE_NOUNS,
-                              static=STATIC_NOUNS)
+    word_lists = json_data['word_lists']
+    word_lists = pg.WordLists(
+        verbs=word_lists['verb_groups'],
+        uncountable=word_lists['uncountable_nouns'],
+        countable=word_lists['countable_nouns'],
+        static=word_lists['static_nouns'])
 
-    answer, error = pg.ParagraphsGenerator({}, word_lists_generator=word_lists).generate_paragraphs()
+    answer, error = pg.ParagraphsGenerator(json_data['config'], word_lists_generator=word_lists).generate_paragraphs()
 
     response = {'original_paragraph': pg.Serializer.to_json(answer),
                 'display_str': str(error)}
