@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from paragraph_generator import Serializer
+from paragraph_generator import Serializer, Paragraph, Sentence, Noun, Verb, Punctuation
 
 from paragraph_generator_flask import flask_app
 
@@ -95,8 +95,8 @@ class TestFlaskApp(unittest.TestCase):
         word_lists = {
             'verb_groups': verb_groups,
             'countable_nouns': self.countable_nouns,
-            'uncountable_nouns': self.uncountable_nouns,
-            'static_nouns': self.static_nouns
+            'uncountable_nouns': {},
+            'static_nouns': {}
         }
         json_data = {'config': config, 'word_lists': word_lists}
         answer = self.app.get('/generate', json=json_data).get_json()['display_str']
@@ -104,71 +104,171 @@ class TestFlaskApp(unittest.TestCase):
         self.assertIn('with', answer)
         self.assertIn('up', answer)
 
-    # def test_generate_countable_nouns(self):
-    #     verb_groups = [
-    #         {'verb': 'play', 'irregular_past': '', 'preposition': 'with', 'particle': 'up', 'objects': 1}
-    #     ]
-    #     config = {
-    #         'error_probability': 0.0,
-    #         'paragraph_size': 1,
-    #         'probability_negative_verb': 0.0,
-    #         'probability_pronoun': 0.0,
-    #         'probability_plural_noun': 0.0
-    #     }
-    #     word_lists = {
-    #         'verb_groups': verb_groups,
-    #         'countable_nouns': self.countable_nouns,
-    #         'uncountable_nouns': self.uncountable_nouns,
-    #         'static_nouns': self.static_nouns
-    #     }
-    #     json_data = {'config': config, 'word_lists': word_lists}
-    #     answer = self.app.get('/generate', json=json_data).get_json()['display_str']
-    #     self.assertIn('plays', answer)
-    #     self.assertIn('with', answer)
-    #     self.assertIn('up', answer)
-    #
-    # def test_generate_uncountable_nouns(self):
-    #     verb_groups = [
-    #         {'verb': 'play', 'irregular_past': '', 'preposition': 'with', 'particle': 'up', 'objects': 1}
-    #     ]
-    #     config = {
-    #         'error_probability': 0.0,
-    #         'paragraph_size': 1,
-    #         'probability_negative_verb': 0.0,
-    #         'probability_pronoun': 0.0,
-    #         'probability_plural_noun': 0.0
-    #     }
-    #     word_lists = {
-    #         'verb_groups': verb_groups,
-    #         'countable_nouns': self.countable_nouns,
-    #         'uncountable_nouns': self.uncountable_nouns,
-    #         'static_nouns': self.static_nouns
-    #     }
-    #     json_data = {'config': config, 'word_lists': word_lists}
-    #     answer = self.app.get('/generate', json=json_data).get_json()['display_str']
-    #     self.assertIn('plays', answer)
-    #     self.assertIn('with', answer)
-    #     self.assertIn('up', answer)
-    #
-    # def test_generate_static_nouns(self):
-    #     verb_groups = [
-    #         {'verb': 'play', 'irregular_past': '', 'preposition': 'with', 'particle': 'up', 'objects': 1}
-    #     ]
-    #     config = {
-    #         'error_probability': 0.0,
-    #         'paragraph_size': 1,
-    #         'probability_negative_verb': 0.0,
-    #         'probability_pronoun': 0.0,
-    #         'probability_plural_noun': 0.0
-    #     }
-    #     word_lists = {
-    #         'verb_groups': verb_groups,
-    #         'countable_nouns': self.countable_nouns,
-    #         'uncountable_nouns': self.uncountable_nouns,
-    #         'static_nouns': self.static_nouns
-    #     }
-    #     json_data = {'config': config, 'word_lists': word_lists}
-    #     answer = self.app.get('/generate', json=json_data).get_json()['display_str']
-    #     self.assertIn('plays', answer)
-    #     self.assertIn('with', answer)
-    #     self.assertIn('up', answer)
+    def test_generate_countable_nouns(self):
+        countable_nouns = [
+            {'noun': 'child', 'irregular_plural': 'children'}
+        ]
+        config = {
+            'error_probability': 0.0,
+            'paragraph_size': 1,
+            'probability_pronoun': 0.0,
+            'probability_plural_noun': 1.0
+        }
+        word_lists = {
+            'verb_groups': self.verb_groups,
+            'countable_nouns': countable_nouns,
+            'uncountable_nouns': {},
+            'static_nouns': {}
+        }
+        json_data = {'config': config, 'word_lists': word_lists}
+        answer = self.app.get('/generate', json=json_data).get_json()['display_str']
+        self.assertIn('children', answer)
+
+    def test_generate_uncountable_nouns(self):
+        uncountable_nouns = [
+            {'noun': 'water'}
+        ]
+        config = {
+            'error_probability': 0.0,
+            'paragraph_size': 1,
+            'probability_pronoun': 0.0,
+            'probability_plural_noun': 1.0
+        }
+        word_lists = {
+            'verb_groups': self.verb_groups,
+            'uncountable_nouns': uncountable_nouns,
+            'countable_nouns': {},
+            'static_nouns': {}
+        }
+        json_data = {'config': config, 'word_lists': word_lists}
+        answer = self.app.get('/generate', json=json_data).get_json()['display_str']
+        self.assertIn('water', answer)
+
+    def test_generate_static_nouns(self):
+        static_nouns = [
+            {'noun': 'Joe', 'is_plural': False}
+        ]
+        config = {
+            'error_probability': 0.0,
+            'paragraph_size': 1,
+            'probability_pronoun': 0.0,
+            'probability_plural_noun': 1.0
+        }
+        word_lists = {
+            'verb_groups': self.verb_groups,
+            'static_nouns': static_nouns,
+            'countable_nouns': {},
+            'uncountable_nouns': {}
+        }
+        json_data = {'config': config, 'word_lists': word_lists}
+        answer = self.app.get('/generate', json=json_data).get_json()['display_str']
+        self.assertIn('Joe', answer)
+
+    def test_query_is_correct_true(self):
+        paragraph = Paragraph([
+            Sentence([
+                Noun('dog').indefinite().capitalize(), Verb('play').third_person(), Punctuation.PERIOD
+            ])
+        ])
+        serialized = Serializer.to_json(paragraph)
+        submission_str = 'A dog plays.'
+        json_data = {'original_paragraph': serialized, 'submission_str': submission_str}
+
+        answer = self.app.get('/query/is_correct', json=json_data).get_json()
+        expected = {'is_correct': True}
+        self.assertEqual(answer, expected)
+
+    def test_query_is_correct_true_can_accept_noun_number_change(self):
+        paragraph = Paragraph([
+            Sentence([
+                Noun('dog').indefinite().capitalize(), Verb('play').third_person(), Punctuation.PERIOD
+            ]),
+            Sentence([
+                Noun('dog').definite().capitalize(), Verb('eat').third_person(), Punctuation.PERIOD
+            ])
+        ])
+        serialized = Serializer.to_json(paragraph)
+        submission_str = 'Dogs play. The dogs eat.'
+        json_data = {'original_paragraph': serialized, 'submission_str': submission_str}
+
+        answer = self.app.get('/query/is_correct', json=json_data).get_json()
+        expected = {'is_correct': True}
+        self.assertEqual(answer, expected)
+
+    def test_query_is_correct_false(self):
+        paragraph = Paragraph([
+            Sentence([
+                Noun('dog').indefinite().capitalize(), Verb('play').third_person(), Punctuation.PERIOD
+            ])
+        ])
+        serialized = Serializer.to_json(paragraph)
+        submission_str = 'A dog play.'
+        json_data = {'original_paragraph': serialized, 'submission_str': submission_str}
+
+        answer = self.app.get('/query/is_correct', json=json_data).get_json()
+        expected = {'is_correct': False}
+        self.assertEqual(answer, expected)
+
+    def test_query_count_word_errors(self):
+        paragraph = Paragraph([
+            Sentence([
+                Noun('dog').indefinite().capitalize(), Verb('play').third_person(), Punctuation.PERIOD
+            ])
+        ])
+        serialized = Serializer.to_json(paragraph)
+        submission_str = 'The doggie play.'
+        json_data = {'original_paragraph': serialized, 'submission_str': submission_str}
+
+        answer = self.app.get('/query/count_word_errors', json=json_data).get_json()
+        expected = {'word_errors': 2}
+        self.assertEqual(answer, expected)
+
+    def test_query_count_sentence_errors(self):
+        paragraph = Paragraph([
+            Sentence([
+                Noun('dog').indefinite().capitalize(), Verb('play').third_person(), Punctuation.PERIOD
+            ])
+        ])
+        serialized = Serializer.to_json(paragraph)
+        submission_str = 'The doggie play.'
+        json_data = {'original_paragraph': serialized, 'submission_str': submission_str}
+
+        answer = self.app.get('/query/count_sentence_errors', json=json_data).get_json()
+        expected = {'sentence_errors': 1}
+        self.assertEqual(answer, expected)
+
+    def test_query_word_hints(self):
+        paragraph = Paragraph([
+            Sentence([
+                Noun('dog').indefinite().capitalize(), Verb('play').third_person(), Punctuation.PERIOD
+            ])
+        ])
+        serialized = Serializer.to_json(paragraph)
+        submission_str = 'The doggie play.'
+        json_data = {'original_paragraph': serialized, 'submission_str': submission_str}
+
+        answer = self.app.get('/query/word_hints', json=json_data).get_json()
+        expected = {
+            'word_errors': 2,
+            'hint_paragraph': '<bold>The doggie</bold> <bold>play</bold>.',
+            'missing_sentences': 0
+        }
+        self.assertEqual(answer, expected)
+
+    def test_query_sentence_hints(self):
+        paragraph = Paragraph([
+            Sentence([
+                Noun('dog').indefinite().capitalize(), Verb('play').third_person(), Punctuation.PERIOD
+            ])
+        ])
+        serialized = Serializer.to_json(paragraph)
+        submission_str = 'The doggie play.'
+        json_data = {'original_paragraph': serialized, 'submission_str': submission_str}
+
+        answer = self.app.get('/query/sentence_hints', json=json_data).get_json()
+        expected = {
+            'sentence_errors': 1,
+            'hint_paragraph': '<bold>The doggie play.</bold>',
+            'missing_sentences': 0
+        }
+        self.assertEqual(answer, expected)
