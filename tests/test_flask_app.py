@@ -1,3 +1,4 @@
+import json
 import random
 import unittest
 
@@ -17,8 +18,9 @@ STATIC_NOUNS = [{'noun': 'Joe', 'is_plural': False}, {'noun': 'the two Jakes', '
 class TestFlaskApp(unittest.TestCase):
 
     def setUp(self):
-        self.app = flask_app.app.test_client()
-        flask_app.app.testing = True
+        test_app = flask_app.create_app()
+        test_app.testing = True
+        self.app = test_app.test_client()
         self.verb_groups = VERBS
         self.countable_nouns = COUNTABLE_NOUNS
         self.uncountable_nouns = UNCOUNTABLE_NOUNS
@@ -28,6 +30,9 @@ class TestFlaskApp(unittest.TestCase):
                            'uncountable_nouns': self.uncountable_nouns,
                            'countable_nouns': self.countable_nouns,
                            'static_nouns': self.static_nouns}
+
+    def test_thing(self):
+        print(self.app)
 
     def test_generate_with_empty_config_json(self):
         random.seed(374837)
@@ -271,4 +276,28 @@ class TestFlaskApp(unittest.TestCase):
             'hint_paragraph': '<bold>The doggie play.</bold>',
             'missing_sentences': 0
         }
+        self.assertEqual(answer, expected)
+
+    def test_catch_bad_json_str(self):
+        json_str = json.dumps({'config': {}, 'word_lists': self.word_lists})
+        bad_json = json_str[:-2]
+        answer = self.app.get('/generate', data=bad_json, content_type='application/json').get_json()
+        expected = {
+            'status_code': 400,
+            'error_type': 'BadRequest',
+            'title': 'Bad Request',
+            'text': answer['text']
+        }
+        self.assertEqual(answer, expected)
+
+    def test_generate_internal_error_due_to_bad_config_as_acts_in_actual_app(self):
+        test_app = flask_app.create_app()
+        client = test_app.test_client()
+
+        json_data = {'config': {'error_probability': 'banana'}, 'word_lists': self.word_lists}
+        answer = client.get('/generate', json=json_data).get_json()
+        expected = {'error_type': 'TypeError',
+                    'status_code': 500,
+                    'text': "'<' not supported between instances of 'float' and 'str'",
+                    'title': 'internal server error'}
         self.assertEqual(answer, expected)
