@@ -27,7 +27,7 @@ def create_test_app():
     return app
 
 
-class TestJSONErrorHandler(unittest.TestCase):
+class TestBindJSONErrorHandler(unittest.TestCase):
     def setUp(self):
         unbound_app = create_test_app()
         unbound_app.testing = True

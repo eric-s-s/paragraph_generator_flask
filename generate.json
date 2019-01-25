@@ -1,0 +1,15 @@
+{
+    "config": {},
+    "word_lists": {
+        "verb_groups": [
+            {"verb": "go", "irregular_past": "went", "particle": "away", "preposition": "with", "objects": 1},
+            {"verb": "see", "irregular_past": "saw", "particle": "", "preposition": "", "objects": 1}
+        ],
+        "countable_nouns": [
+            {"noun": "dog", "irregular_plural": ""},
+            {"noun": "child", "irregular_plural": "children"}
+        ],
+        "uncountable_nouns": [{"noun": "water", "definite": false}, {"noun": "air", "definite": true}],
+        "static_nouns": [{"noun": "Joe", "is_plural": false}, {"noun": "the Dudes", "is_plural": true}]
+    }
+}

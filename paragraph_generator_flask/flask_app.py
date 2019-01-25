@@ -1,6 +1,5 @@
 import paragraph_generator as pg
 from flask import Flask, jsonify, request
-from werkzeug.exceptions import BadRequest
 
 from paragraph_generator_flask.bind_json_error_handlers import bind_json_error_handlers
 
@@ -68,16 +67,6 @@ def create_app():
         new_response[new_key] = base_response['error_count']
         return new_response
 
-    # @app.errorhandler(BadRequest)
-    # def bad_request(e):
-    #     response = {
-    #         'error': 400,
-    #         'error_type': 'BadRequest',
-    #         'title': 'bad request',
-    #         'text': str(e)
-    #     }
-    #     return jsonify(response)
-    #
     return app
 
 
