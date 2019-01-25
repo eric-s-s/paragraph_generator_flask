@@ -12,8 +12,7 @@ from parent directory
 $ pip install -r requirements.txt
 ```
 ```bash
-$ export FLASK_APP=flaskapp/myapp.py
-$ flask run
+$ python -m paragraph_generator_flask.flask_app 
 ```
 
 open your web-browser to `localhost:5000`
