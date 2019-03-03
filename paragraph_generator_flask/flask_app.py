@@ -1,7 +1,7 @@
 import paragraph_generator as pg
 from flask import Flask, jsonify, request
 
-from paragraph_generator_flask.bind_json_error_handlers import bind_json_error_handlers
+from bind_json_error_handlers.bind_json_error_handlers import bind_json_error_handlers
 
 
 def create_app():
