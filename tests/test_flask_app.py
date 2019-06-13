@@ -72,6 +72,47 @@ class TestFlaskApp(unittest.TestCase):
         punctuation_count = display_str.count('.') + display_str.count('!')
         self.assertEqual(punctuation_count, 1)
 
+    def test_generate_with_config_json_boolean_fields(self):
+        random.seed(23456)
+        base_config = {
+            "error_probability": 1.0,
+            "noun_errors": False,
+            "pronoun_errors": False,
+            "verb_errors": False,
+            "is_do_errors": False,
+            "preposition_transpose_errors": False,
+            "punctuation_errors": False,
+            "tense": "simple_present",
+            "probability_plural_noun": 0.0,
+            "probability_negative_verb": 0.0,
+            "probability_pronoun": 0.0,
+            "paragraph_type": "chain",
+            "paragraph_size": 2
+        }
+        json_data = {
+            'config': base_config,
+            'word_lists': self.word_lists
+        }
+
+        noun_errors = base_config.copy()
+        noun_errors['noun_errors'] = True
+        json_data['config'] = noun_errors
+
+        answer_json = self.app.get('generate', data=json.dumps(json_data),
+                                   content_type='application/json').get_json()
+        expected = "Child takes away a Joe. A Joe goes to waters."
+        self.assertEqual(expected, answer_json['display_str'])
+
+        punctuation_errors = base_config.copy()
+        punctuation_errors['punctuation_errors'] = True
+        json_data['config'] = punctuation_errors
+
+        answer_json = self.app.get('generate', data=json.dumps(json_data),
+                                   content_type='application/json').get_json()
+
+        expected = "A dog goes to Joe, Joe goes to the air,"
+        self.assertEqual(expected, answer_json['display_str'])
+
     def test_generate_original_paragraph_is_properly_serialized_as_answer_paragraph(self):
         config = {
             'error_probability': 0.0,

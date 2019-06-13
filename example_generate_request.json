@@ -1,5 +1,22 @@
 {
-    "config": {},
+    "config": {
+        "error_probability": 0.0,
+        "noun_errors": true,
+        "pronoun_errors": true,
+        "verb_errors": true,
+        "is_do_errors": true,
+        "preposition_transpose_errors": true,
+        "punctuation_errors": true,
+
+        "tense": "simple_past",
+        "probability_plural_noun": 0.0,
+        "probability_negative_verb": 0.0,
+        "probability_pronoun": 0.0,
+
+        "paragraph_type": "chain",
+        "subject_pool": 2,
+        "paragraph_size": 5
+    },
     "word_lists": {
         "verb_groups": [
             {
