@@ -1,7 +1,6 @@
 import paragraph_generator as pg
-from flask import Flask, jsonify, request
-
 from bind_json_error_handlers import bind_json_error_handlers
+from flask import Flask, jsonify, request
 
 
 def create_app():
@@ -28,7 +27,11 @@ def create_app():
 
     @app.route('/query/<query_type>')
     def query(query_type):
-        checker = _get_checker()
+        json_data = request.get_json()
+        submission_str = json_data['submission_str']
+        original_paragraph_json = json_data['original_paragraph']
+        checker = _get_checker(submission_str, original_paragraph_json)
+
         methods = {
             'is_correct': checker.is_submission_correct,
             'count_word_errors': checker.count_word_errors,
@@ -43,10 +46,8 @@ def create_app():
 
         return jsonify(response)
 
-    def _get_checker():
-        json_data = request.get_json()
-        submission_str = json_data['submission_str']
-        paragraph = pg.Serializer.from_json(json_data['original_paragraph'])
+    def _get_checker(submission_str, original_paragraph_json):
+        paragraph = pg.Serializer.from_json(original_paragraph_json)
         checker = pg.AnswerChecker(submission_str, paragraph)
         return checker
 
