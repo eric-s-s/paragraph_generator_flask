@@ -1,5 +1,5 @@
 git+https://github.com/eric-s-s/paragraph_generator
 git+https://github.com/eric-s-s/bind_json_error_handlers
 
-Flask==1.0.2
+Flask==2.3.2
 uWSGI==2.0.17.1
